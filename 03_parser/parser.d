@@ -18,7 +18,7 @@ enum LexicalType
 
 union TokenValue
 {
-    int number = 0;
+    int number;
     char onechar;
     string name;
 }
@@ -88,12 +88,27 @@ int parseOne(Token* result, int prev)
         }
         return prev;
     }
-    // parse executable name
-    else if (isalpha(prev))
+    // parse left/right braces
+    else if (prev == '{')
+    {
+        result.lexType = LexicalType.leftBrace;
+        prev = cl_getc();
+        return prev;
+    }
+    else if (prev == '}')
+    {
+        result.lexType = LexicalType.rightBrace;
+        prev = cl_getc();
+        return prev;
+    }
+    // parse executable/literal name
+    else if (isalpha(prev) || prev == '/')
     {
         import core.stdc.stdlib : malloc;
         import core.stdc.string : strncpy;
-        result.lexType = LexicalType.executableName;
+        result.lexType = prev == '/'
+                         ? LexicalType.literalName
+                         : LexicalType.executableName;
         const s = input + pos - 1;
         size_t n = 1;
         while (isgraph(prev))
@@ -111,20 +126,7 @@ int parseOne(Token* result, int prev)
     assert(false);
 }
 
-/// test parse one number
-unittest
-{
-    import cl_getc : cl_getc_set_src;
-
-    Token token;
-    cl_getc_set_src("123");
-    auto prev = parseOne(&token);
-    assert(prev == EOF);
-    assert(token.lexType == LexicalType.number);
-    assert(token.value.number == 123);
-}
-
-/// test parse two numbers and one space
+/// test parse numbers
 unittest
 {
     import cl_getc : cl_getc_set_src;
@@ -144,6 +146,10 @@ unittest
     assert(prev == EOF);
     assert(token.lexType == LexicalType.number);
     assert(token.value.number == 345);
+
+    prev = parseOne(&token, prev);
+    assert(prev == EOF);
+    assert(token.lexType == LexicalType.eof);
 }
 
 /// test parse an executable name
@@ -152,9 +158,68 @@ unittest
     import cl_getc : cl_getc_set_src;
 
     Token token;
-    cl_getc_set_src("add_");
+    cl_getc_set_src("add_ 123");
     auto prev = parseOne(&token);
-    assert(prev == EOF);
+    assert(prev == ' ');
     assert(token.lexType == LexicalType.executableName);
     assert(token.value.name == "add_");
+
+    prev = parseOne(&token, prev);
+    assert(prev == '1');
+    assert(token.lexType == LexicalType.space);
+
+    prev = parseOne(&token, prev);
+    assert(prev == EOF);
+    assert(token.lexType == LexicalType.number);
+    assert(token.value.number == 123);
+
+    prev = parseOne(&token, prev);
+    assert(prev == EOF);
+    assert(token.lexType == LexicalType.eof);
+}
+
+/// test parse a literal name
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    Token token;
+    cl_getc_set_src("/add_ 123");
+    auto prev = parseOne(&token);
+    assert(prev == ' ');
+    assert(token.lexType == LexicalType.literalName);
+    assert(token.value.name == "/add_");
+
+    prev = parseOne(&token, prev);
+    assert(prev == '1');
+    assert(token.lexType == LexicalType.space);
+
+    prev = parseOne(&token, prev);
+    assert(prev == EOF);
+    assert(token.lexType == LexicalType.number);
+    assert(token.value.number == 123);
+
+    prev = parseOne(&token, prev);
+    assert(prev == EOF);
+    assert(token.lexType == LexicalType.eof);
+}
+
+/// test parse braces
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    Token token;
+    cl_getc_set_src("{}");
+    auto prev = parseOne(&token);
+    assert(prev == '}');
+    assert(token.lexType == LexicalType.leftBrace);
+
+    prev = parseOne(&token, prev);
+    assert(prev == EOF);
+    assert(token.lexType == LexicalType.rightBrace);
+
+    prev = parseOne(&token, prev);
+    assert(prev == EOF);
+    assert(token.lexType == LexicalType.eof);
 }
