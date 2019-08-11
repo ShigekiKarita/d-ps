@@ -58,6 +58,26 @@
           "dflags": ["-dip25", "-dip1000", "-betterC"]
         }
       }
+    },
+    {
+      "name": "05_eval",
+      "targetType": "executable",
+      "sourcePaths": ["05_eval"],
+      "importPaths": ["05_eval"],
+      "buildTypes": {
+        "unittest": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000"]
+        },
+        "debug": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        },
+        "release": {
+          "buildOptions": ["releaseMode", "optimize", "inline"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        }
+      }
     }
   ]
 }
