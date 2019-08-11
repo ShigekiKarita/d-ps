@@ -5,7 +5,7 @@ module cl_getc;
 static const(char)* input = "123 456";
 static int pos = 0;
 
-void cl_getc_set_src(string str)
+void cl_getc_set_src(const(char)[] str)
 {
     import core.stdc.string : memcpy;
     input = str.ptr;
