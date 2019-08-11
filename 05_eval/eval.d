@@ -24,16 +24,11 @@ struct PSObject
 
 Stack!PSObject globalStack;
 
-/// evaluate input string on the globalStack
-void eval()
+void parseInput()
 {
-    import parser : parseOne, Token, LexicalType;
     import core.stdc.stdio : fprintf, stderr;
+    import parser : parseOne, Token, LexicalType;
 
-    // reset stack
-    globalStack.length = 0;
-
-    // push tokens to stack
     Token token;
     with (LexicalType)
     {
@@ -60,10 +55,13 @@ void eval()
                     assert(false);
             }
         }
-        assert(token.lexType == eof);
     }
-    /*
-    // pop stack with executable
+}
+
+void executeStack()
+{
+    import core.stdc.stdio : fprintf, stderr;
+
     bool end = false;
     while (globalStack.length > 1 && !end)
     {
@@ -76,10 +74,14 @@ void eval()
                     if (top.value.name == "add")
                     {
                         // get args
+                        executeStack();
                         auto a = globalStack.pop();
                         assert(a.type == number, "1st arg of add should be number");
+
+                        executeStack();
                         auto b = globalStack.pop();
                         assert(b.type == number, "2nd arg of add should be number");
+
                         // set return value
                         PSObject ret;
                         ret.type = number;
@@ -87,7 +89,11 @@ void eval()
                         globalStack.push(ret);
                         break;
                     }
-                    goto default;
+                    else
+                    {
+                        fprintf(stderr, "undefined name in eval(): %s\n", top.value.name.ptr);
+                        assert(false);
+                    }
                 case number:
                     globalStack.push(top);
                     end = true;
@@ -98,7 +104,20 @@ void eval()
             }
         }
     }
-    */
+
+}
+
+/// evaluate input string on the globalStack
+void eval()
+{
+    // reset stack
+    globalStack.length = 0;
+
+    // parse input and push tokens to stack
+    parseInput();
+
+    // pop stack with executable
+    executeStack();
 }
 
 /// test eval one number
@@ -127,4 +146,28 @@ unittest
     assert(a.value.number == 456);
     assert(b.type == PSType.number);
     assert(b.value.number == 123);
+}
+
+/// test eval add two numbers
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    cl_getc_set_src("123 456 add");
+    eval();
+    auto a = globalStack.pop();
+    assert(a.type == PSType.number);
+    assert(a.value.number == 123 + 456);
+}
+
+/// test eval nested add
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); // 1 2 3 add add");
+    eval();
+    auto a = globalStack.pop();
+    assert(a.type == PSType.number);
+    assert(a.value.number == 45);
 }
