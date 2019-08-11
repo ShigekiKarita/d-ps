@@ -1,43 +1,63 @@
 {
-    "authors": [
-        "karita"
-    ],
-    "copyright": "Copyright © 2019, karita",
-    "description": "Tiny PostScript Interpreter",
-    "license": "BSL-1.0",
-    "name": "d-ps",
-    "subPackages": [
-        {
-            "name": "01_int_parser",
-            "targetType": "executable",
-            "sourcePaths": ["01_int_parser"],
-            "dflags": ["-dip25", "-dip1000", "-dip1008", "-betterC"]
+  "authors": [
+    "karita"
+  ],
+  "copyright": "Copyright © 2019, karita",
+  "description": "Tiny PostScript Interpreter",
+  "license": "BSL-1.0",
+  "name": "d-ps",
+  "subPackages": [
+    {
+      "name": "01_int_parser",
+      "targetType": "executable",
+      "sourcePaths": ["01_int_parser"],
+      "dflags": ["-dip25", "-dip1000", "-dip1008", "-betterC"]
+    },
+    {
+      "name": "02_int_parser_getc",
+      "targetType": "executable",
+      "sourcePaths": ["02_int_parser_getc"],
+      "dflags": ["-dip25", "-dip1000", "-dip1008", "-betterC"]
+    },
+    {
+      "name": "03_parser",
+      "targetType": "executable",
+      "sourcePaths": ["03_parser"],
+      "importPaths": ["03_parser"],
+      "buildTypes": {
+        "unittest": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000"]
         },
-        {
-            "name": "02_int_parser_getc",
-            "targetType": "executable",
-            "sourcePaths": ["02_int_parser_getc"],
-            "dflags": ["-dip25", "-dip1000", "-dip1008", "-betterC"]
+        "debug": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
         },
-        {
-            "name": "03_parser",
-            "targetType": "executable",
-            "sourcePaths": ["03_parser"],
-            "importPaths": ["03_parser"],
-            "buildTypes": {
-                "unittest": {
-                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
-                    "dflags": ["-dip25", "-dip1000"]
-                },
-                "debug": {
-                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
-                    "dflags": ["-dip25", "-dip1000", "-betterC"]
-                },
-                "release": {
-                    "buildOptions": ["releaseMode", "optimize", "inline"],
-                    "dflags": ["-dip25", "-dip1000", "-betterC"]
-                }
-            },
+        "release": {
+          "buildOptions": ["releaseMode", "optimize", "inline"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
         }
-    ]
+      }
+    },
+    {
+      "name": "04_stack",
+      "targetType": "executable",
+      "sourcePaths": ["04_stack"],
+      "importPaths": ["04_stack"],
+      "buildTypes": {
+        "unittest": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000"]
+        },
+        "debug": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        },
+        "release": {
+          "buildOptions": ["releaseMode", "optimize", "inline"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        }
+      }
+    }
+  ]
 }
