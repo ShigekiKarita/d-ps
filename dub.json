@@ -29,11 +29,11 @@
                     "buildOptions": ["unittests", "debugMode", "debugInfo"],
                     "dflags": ["-dip25", "-dip1000"]
                 },
-                "betterC-debug": {
+                "debug": {
                     "buildOptions": ["unittests", "debugMode", "debugInfo"],
                     "dflags": ["-dip25", "-dip1000", "-betterC"]
                 },
-                "betterC-release": {
+                "release": {
                     "buildOptions": ["releaseMode", "optimize", "inline"],
                     "dflags": ["-dip25", "-dip1000", "-betterC"]
                 }

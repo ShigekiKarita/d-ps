@@ -19,7 +19,7 @@ enum LexicalType
 union TokenValue
 {
     int number;
-    char onechar;
+    int onechar;
     string name;
 }
 
@@ -63,6 +63,7 @@ int parseOne(Token* result, int prev)
     if (prev == EOF)
     {
         result.lexType = LexicalType.eof;
+        prev = cl_getc();
         return prev;
     }
     // parse space
@@ -92,12 +93,14 @@ int parseOne(Token* result, int prev)
     else if (prev == '{')
     {
         result.lexType = LexicalType.leftBrace;
+        result.value.onechar = prev;
         prev = cl_getc();
         return prev;
     }
     else if (prev == '}')
     {
         result.lexType = LexicalType.rightBrace;
+        result.value.onechar = prev;
         prev = cl_getc();
         return prev;
     }
@@ -118,6 +121,7 @@ int parseOne(Token* result, int prev)
         }
         auto p = cast(char*) malloc(char.sizeof * n);
         strncpy(p, s, n);
+        p[n] = 0;
         result.value.name = cast(string) p[0 .. n - 1];
         return prev;
     }
@@ -222,4 +226,51 @@ unittest
     prev = parseOne(&token, prev);
     assert(prev == EOF);
     assert(token.lexType == LexicalType.eof);
+}
+
+
+
+void parser_print_all() {
+    int ch = EOF;
+    Token token;
+    do
+    {
+        ch = parseOne(&token, ch);
+        if (token.lexType != LexicalType.undefined)
+        {
+            with (LexicalType)
+                switch(token.lexType)
+                {
+                    case number:
+                        printf("num: %d\n", token.value.number);
+                        break;
+                    case space:
+                        printf("space!\n");
+                        break;
+                    case leftBrace:
+                        printf("Open curly brace '%c'\n", token.value.onechar);
+                        break;
+                    case rightBrace:
+                        printf("Close curly brace '%c'\n", token.value.onechar);
+                        break;
+                    case executableName:
+                        printf("EXECUTABLE_NAME: %s\n", token.value.name.ptr);
+                        break;
+                    case literalName:
+                        printf("LITERAL_NAME: %s\n", token.value.name.ptr);
+                        break;
+                    default:
+                        static foreach (s; __traits(allMembers, LexicalType))
+                        {
+                            {
+                                mixin("auto b = token.lexType == " ~ s ~ ";");
+                                if (b)
+                                    printf("Unknown type %s.%s\n", LexicalType.stringof.ptr, s.ptr);
+                            }
+                        }
+                        break;
+                }
+        }
+    }
+    while(ch != EOF);
 }
