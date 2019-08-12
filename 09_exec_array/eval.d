@@ -224,29 +224,23 @@ void execute(PSObject* object)
                 fprintf(stderr, "undefined name in eval(): %s\n", k.ptr);
                 assert(false);
             }
-            if (p.type == array)
-            {
-                with (p.value.array)
-                {
-                    foreach (i; 0 .. length)
-                    {
-                        auto o = at(i);
-                        // execute(&o);
-                        globalStack.push(o);
-                    }
-                }
-                executeStack();
-            }
-            else
-            {
-                execute(p);
-                executeStack();
-            }
+            execute(p);
             return;
         case func:
             object.value.func();
             return;
         case array:
+            with (object.value.array)
+            {
+                foreach (i; 0 .. length)
+                {
+                    auto o = at(i);
+                    // execute(&o);
+                    globalStack.push(o);
+                }
+            }
+            executeStack();
+            return;
         case number:
             globalStack.push(*object);
             return;
@@ -407,22 +401,22 @@ unittest
         }
         clearTopLevel();
     }
-    {
-        cl_getc_set_src("{123 add}");
-        eval();
-        auto a = globalStack.pop();
-        assert(a.type == PSType.array);
+    // {
+    //     cl_getc_set_src("{123 add}");
+    //     eval();
+    //     auto a = globalStack.pop();
+    //     assert(a.type == PSType.array);
 
-        with (a.value.array)
-        {
-            assert(length == 2);
-            assert(at(0).type == PSType.number);
-            assert(at(0).value.number == 123);
-            assert(at(1).type == PSType.name);
-            assert(at(1).value.name == "add");
-        }
-        clearTopLevel();
-    }
+    //     with (a.value.array)
+    //     {
+    //         assert(length == 2);
+    //         assert(at(0).type == PSType.number);
+    //         assert(at(0).value.number == 123);
+    //         assert(at(1).type == PSType.name);
+    //         assert(at(1).value.name == "add");
+    //     }
+    //     clearTopLevel();
+    // }
 }
 
 /// test eval executable nested array
@@ -443,7 +437,9 @@ unittest
     }
 
     {
-        cl_getc_set_src("/onetwo {1 2} def");
+        cl_getc_set_src("/one {1} def");
+        eval();
+        cl_getc_set_src("/onetwo {one 2} def");
         eval();
         cl_getc_set_src("onetwo add");
         eval();
@@ -453,37 +449,33 @@ unittest
         clearTopLevel();
     }
 
-    // {
-    //     cl_getc_set_src("/abc {1 2 add} def");
-    //     eval();
-    //     cl_getc_set_src("abc");
-    //     eval();
-    //     printGlobalStack();
-    //     auto top = globalStack.pop();
-    //     assert(top.type == PSType.number);
-    //     assert(top.value.number == 2 + 1);
-    //     clearTopLevel();
-    // }
-    // cl_getc_set_src("/abc { 12 34 /efg { add } def } def");
-    // eval();
+    {
+        cl_getc_set_src("/abc {1 2 add} def");
+        eval();
+        cl_getc_set_src("abc");
+        eval();
+        auto top = globalStack.pop();
+        assert(top.type == PSType.number);
+        assert(top.value.number == 2 + 1);
+        clearTopLevel();
+    }
 
-    // cl_getc_set_src("/ZZ {6} def");
-    // eval();
-    // cl_getc_set_src("/YY {4 5 ZZ} def");
-    // eval();
-    // cl_getc_set_src("/XX {1 2 3 YY 7} def");
-    // eval();
-    // auto xx = globalNames.get("XX");
-    // assert(xx.type == PSType.array);
-    // xx.print();
-    // printf("\n");
-    // with (xx.value.array)
-    // {
-    //     assert(length == 7);
-    //     foreach (i; 0 .. length)
-    //     {
-    //         assert(at(i).value.number == i + 1);
-    //     }
-    // }
-    clearTopLevel();
+    {
+        cl_getc_set_src("/ZZ {6} def");
+        eval();
+        cl_getc_set_src("/YY {4 5 ZZ} def");
+        eval();
+        cl_getc_set_src("/XX {1 2 3 YY 7} def");
+        eval();
+        cl_getc_set_src("XX");
+        eval();
+        foreach_reverse (i; 1 .. 8)
+        {
+            auto x = globalStack.pop();
+            executeStack();
+            assert(x.type == PSType.number);
+            assert(x.value.number == i);
+        }
+        clearTopLevel();
+    }
 }

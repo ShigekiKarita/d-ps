@@ -8,7 +8,7 @@ import eval : eval, executeStack, globalNames, globalStack, PSObject, PSType, cl
 void defOp()
 {
     // get args
-    executeStack();
+    // executeStack();
     auto a = globalStack.pop();
 
     // executeStack();
@@ -17,7 +17,9 @@ void defOp()
 
     // put name into global dict
     globalNames.put(b.value.name, a);
-    globalStack.push(a);
+
+    // NOTE: rethinking return value?
+    // globalStack.push(a);
 }
 
 /// test eval def

@@ -18,12 +18,7 @@ void main()
         if (globalStack.length > 0)
         {
             auto top = globalStack.pop();
-            // assert(globalStack.length == 0, "stack is not empty after eval()");
-            // assert(top.type == PSType.number, "unsupported type to print");
-            // printf("%d\n", top.value.number);
             top.print();
-            printf("\nstack: ");
-            printGlobalStack();
         }
         printf(">>> ");
     }
