@@ -3,6 +3,7 @@ module eval;
 @nogc nothrow:
 
 import stack : Stack;
+import dict : Dict;
 
 /// Type tag for PSObject
 enum PSType
@@ -29,6 +30,13 @@ struct PSObject
 
 /// Global stack for eval()
 Stack!PSObject globalStack;
+Dict!(string, PSObject) globalNames;
+
+void clearTopLevel()
+{
+    globalStack.length = 0;
+    globalNames.length = 0;
+}
 
 /// Parse the global input to the global stack for eval()
 void parseInput()
@@ -83,7 +91,8 @@ void executeStack()
             switch (top.type)
             {
             case executableName:
-                if (top.value.name == "add")
+                auto name = top.value.name;
+                if (name == "add")
                 {
                     // get args
                     executeStack();
@@ -101,7 +110,7 @@ void executeStack()
                     globalStack.push(ret);
                     break;
                 }
-                else if (top.value.name == "def")
+                else if (name == "def")
                 {
                     // get args
                     executeStack();
@@ -112,12 +121,20 @@ void executeStack()
                     auto b = globalStack.pop();
                     assert(b.type == literalName, "2nd arg of add should be literal name");
 
+                    // put name into global dict
+                    globalNames.put(b.value.name, a);
                     break;
                 }
                 else
                 {
-                    fprintf(stderr, "undefined name in eval(): %s\n", top.value.name.ptr);
-                    assert(false);
+                    auto object = globalNames.get(name);
+                    if (object is null)
+                    {
+                        fprintf(stderr, "undefined name in eval(): %s\n", top.value.name.ptr);
+                        assert(false);
+                    }
+                    globalStack.push(*object);
+                    break;
                 }
             case number:
                 globalStack.push(top);
@@ -129,15 +146,11 @@ void executeStack()
             }
         }
     }
-
 }
 
 /// evaluate input string on the globalStack
 void eval()
 {
-    // reset stack
-    globalStack.length = 0;
-
     // parse input and push tokens to stack
     parseInput();
 
@@ -150,6 +163,8 @@ unittest
 {
     import cl_getc : cl_getc_set_src;
 
+    scope (exit) clearTopLevel();
+
     cl_getc_set_src("123");
     eval();
     auto top = globalStack.pop();
@@ -161,6 +176,8 @@ unittest
 unittest
 {
     import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
 
     cl_getc_set_src("123 456");
     eval();
@@ -178,6 +195,8 @@ unittest
 {
     import cl_getc : cl_getc_set_src;
 
+    scope (exit) clearTopLevel();
+
     cl_getc_set_src("123 456 add");
     eval();
     auto a = globalStack.pop();
@@ -190,9 +209,28 @@ unittest
 {
     import cl_getc : cl_getc_set_src;
 
+    scope (exit) clearTopLevel();
+
     cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); // 1 2 3 add add");
     eval();
     auto a = globalStack.pop();
     assert(a.type == PSType.number);
     assert(a.value.number == 45);
+}
+
+/// test eval def
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+
+    cl_getc_set_src("/abc 12 def");
+    eval();
+    auto abc = globalNames.get("abc");
+    assert(abc.type == PSType.number);
+    assert(abc.value.number == 12);
+    // auto a = globalStack.pop();
+    // assert(a.type == PSType.number);
+    // assert(a.value.number == 123 + 456);
 }
