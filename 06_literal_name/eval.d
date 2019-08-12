@@ -230,7 +230,10 @@ unittest
     auto abc = globalNames.get("abc");
     assert(abc.type == PSType.number);
     assert(abc.value.number == 12);
-    // auto a = globalStack.pop();
-    // assert(a.type == PSType.number);
-    // assert(a.value.number == 123 + 456);
+
+    cl_getc_set_src("1 abc add");
+    eval();
+    auto a = globalStack.pop();
+    assert(a.type == PSType.number);
+    assert(a.value.number == 1 + 12);
 }

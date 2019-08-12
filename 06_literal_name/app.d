@@ -12,10 +12,13 @@ void main()
         assert(buf[$-1] != 0, "too long input");
         cl_getc_set_src(buf);
         eval();
-        auto top = globalStack.pop();
-        assert(globalStack.length == 0, "stack is not empty after eval()");
-        assert(top.type == PSType.number, "unsupported type to print");
-        printf("%d\n", top.value.number);
+        if (globalStack.length > 0)
+        {
+            auto top = globalStack.pop();
+            assert(globalStack.length == 0, "stack is not empty after eval()");
+            assert(top.type == PSType.number, "unsupported type to print");
+            printf("%d\n", top.value.number);
+        }
         printf(">>> ");
     }
 }
