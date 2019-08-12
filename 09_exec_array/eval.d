@@ -35,6 +35,7 @@ struct PSObject
     PSType type;
     PSValue value;
 
+    @nogc nothrow
     void print()
     {
         import core.stdc.stdio : printf;
@@ -55,7 +56,13 @@ struct PSObject
             printf("<builtin function>");
             return;
         case array:
-            printf("<array>");
+            printf("{");
+            foreach (i; 0 .. value.array.length)
+            {
+                value.array.at(i).print();
+                if (i + 1 != value.array.length) printf(", ");
+            }
+            printf("}");
             return;
         }
     }
@@ -64,6 +71,18 @@ struct PSObject
 /// Global stack for eval()
 Stack!PSObject globalStack;
 Dict!(string, PSObject) globalNames;
+
+void printGlobalStack()
+{
+    import core.stdc.stdio : printf;
+    printf("[");
+    foreach (i; 0 .. globalStack.length)
+    {
+        globalStack.payload[i].print();
+        if (i + 1 != globalStack.length) printf(", ");
+    }
+    printf("]\n");
+}
 
 /// Top level (global) data initialization
 void initTopLevel()
@@ -310,4 +329,27 @@ unittest
         assert(at(1).type == PSType.name);
         assert(at(1).value.name == "add");
     }
+}
+
+/// test eval executable nested array
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+
+    cl_getc_set_src("/abc { 12 34 /efg { add } def } def");
+    // eval();
+    pushInput();
+    printGlobalStack();
+    // auto a = globalStack.pop();
+    // assert(a.type == PSType.array);
+    // with (a.value.array)
+    // {
+    //     assert(length == 2);
+    //     assert(at(0).type == PSType.number);
+    //     assert(at(0).value.number == 123);
+    //     assert(at(1).type == PSType.name);
+    //     assert(at(1).value.name == "add");
+    // }
 }
