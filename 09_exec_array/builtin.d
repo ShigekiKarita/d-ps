@@ -14,7 +14,7 @@ void defOp()
 
     executeStack();
     auto b = globalStack.pop();
-    assert(b.type == PSType.literalName, "2nd arg of add should be literal name");
+    assert(b.type == PSType.name, "2nd arg of add should be literal name");
 
     // put name into global dict
     globalNames.put(b.value.name, a);

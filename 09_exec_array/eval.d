@@ -4,15 +4,19 @@ module eval;
 
 import stack : Stack;
 import dict : Dict;
+import vec: Vec;
+import parser : Token;
 
 /// Type tag for PSObject
 enum PSType
 {
     undefined,
     number,
-    executableName,
-    literalName,
-    func
+    // executableName,
+    // literalName,
+    name,
+    func,
+    array
 }
 
 /// Value storage for PSObject
@@ -22,6 +26,7 @@ union PSValue
     int number;
     string name;
     void function() func;
+    Vec!PSObject array;
 }
 
 /// Dynamic type for PostScript
@@ -43,14 +48,14 @@ struct PSObject
         case number:
             printf("%d", value.number);
             return;
-        case executableName:
+        case name:
             printf("%s", value.name.ptr);
-            return;
-        case literalName:
-            printf("/%s", value.name.ptr);
             return;
         case func:
             printf("<builtin function>");
+            return;
+        case array:
+            printf("<array>");
             return;
         }
     }
@@ -97,41 +102,83 @@ void clearTopLevel()
     globalNames.length = 0;
 }
 
-/// Parse the global input to the global stack for eval()
-void parseInput()
+/// Push an array object to globalStack
+void pushExecArray(int* parserState)
+{
+    import parser : parseOne, Token, LexicalType;
+
+    PSObject object;
+    object.type = PSType.array;
+    Token token;
+    while (true)
+    {
+        *parserState = parseOne(&token, *parserState);
+        assert(token.lexType != LexicalType.eof,
+               "right brace (}) not found during parsing an array");
+        if (token.lexType == LexicalType.rightBrace) break;
+        if (pushOne(&token, parserState))
+        {
+            auto x = globalStack.pop();
+            object.value.array.pushBack(x);
+        }
+    }
+    globalStack.push(object);
+}
+
+/**
+   Push one object to globalStack
+
+   Params:
+       token = start token for evaluation
+       state = parser state
+
+   Returns: true if and only if pushed
+ */
+bool pushOne(const Token* token, int* state)
 {
     import core.stdc.stdio : fprintf, stderr;
-    import parser : parseOne, Token, LexicalType;
+    import parser : LexicalType;
+
+    PSObject object;
+    with (LexicalType)
+    {
+        switch (token.lexType)
+        {
+        case space:
+            return false;
+        case number:
+            object.type = PSType.number;
+            object.value.number = token.value.number;
+            globalStack.push(object);
+            return true;
+        case executableName:
+        case literalName:
+            object.type = PSType.name;
+            object.value.name = token.value.name;
+            globalStack.push(object);
+            return true;
+        case leftBrace:
+            pushExecArray(state);
+            return true;
+        default:
+            fprintf(stderr, "unsupported token during parsing: %d\n", token.lexType);
+            assert(false);
+        }
+    }
+}
+
+/// Parse the global input to the global stack for eval()
+void pushInput()
+{
+    import core.stdc.stdio : fprintf, stderr;
+    import parser : LexicalType, parseOne;
 
     Token token;
     with (LexicalType)
     {
         for (auto state = parseOne(&token); token.lexType != eof; state = parseOne(&token, state))
         {
-            PSObject object;
-            switch (token.lexType)
-            {
-            case space:
-                break;
-            case number:
-                object.type = PSType.number;
-                object.value.number = token.value.number;
-                globalStack.push(object);
-                break;
-            case executableName:
-                object.type = PSType.executableName;
-                object.value.name = token.value.name;
-                globalStack.push(object);
-                break;
-            case literalName:
-                object.type = PSType.literalName;
-                object.value.name = token.value.name;
-                globalStack.push(object);
-                break;
-            default:
-                fprintf(stderr, "unsupported type for eval(): %d\n", token.lexType);
-                assert(false);
-            }
+            pushOne(&token, &state);
         }
     }
 }
@@ -150,7 +197,7 @@ void executeStack()
         {
             switch (top.type)
             {
-            case executableName:
+            case name:
                 auto name = top.value.name;
                 auto object = globalNames.get(name);
                 if (object is null)
@@ -182,8 +229,8 @@ void executeStack()
 /// evaluate input string on the globalStack
 void eval()
 {
-    // parse input and push tokens to stack
-    parseInput();
+    // push input tokens to stack
+    pushInput();
 
     // pop stack with executable
     executeStack();
@@ -219,4 +266,26 @@ unittest
     assert(a.value.number == 456);
     assert(b.type == PSType.number);
     assert(b.value.number == 123);
+}
+
+/// test eval executable array of numbers
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+
+    cl_getc_set_src("{123 456}");
+    eval();
+    auto a = globalStack.pop();
+    assert(a.type == PSType.array);
+
+    with (a.value.array)
+    {
+        assert(length == 2);
+        assert(at(0).type == PSType.number);
+        assert(at(0).value.number == 123);
+        assert(at(1).type == PSType.number);
+        assert(at(1).value.number == 456);
+    }
 }
