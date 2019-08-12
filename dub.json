@@ -118,6 +118,26 @@
           "dflags": ["-dip25", "-dip1000", "-betterC"]
         }
       }
+    },
+    {
+      "name": "08_primitives",
+      "targetType": "executable",
+      "sourcePaths": ["08_primitives"],
+      "importPaths": ["08_primitives"],
+      "buildTypes": {
+        "unittest": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000"]
+        },
+        "debug": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        },
+        "release": {
+          "buildOptions": ["releaseMode", "optimize", "inline"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        }
+      }
     }
   ]
 }
