@@ -1,9 +1,8 @@
 module dict;
 
-@nogc nothrow:
-
 /// stupid hash function
-hash_t simple_hash(const (char)[] data)
+@nogc nothrow
+hash_t simpleHash(const (char)[] data)
 {
     hash_t ret = 0;
     foreach (d; data)
@@ -13,30 +12,38 @@ hash_t simple_hash(const (char)[] data)
     return ret;
 }
 
-hash_t simple_hash(T)(auto ref T x)
+/// ditto
+@nogc nothrow
+hash_t simpleHash(T)(auto ref T x)
 {
     static assert(T.sizeof % char.sizeof == 0);
     auto p = cast(char*) &x;
-    return simple_hash(p[0 .. T.sizeof]);
+    return simpleHash(p[0 .. T.sizeof]);
 }
 
+///
+@nogc nothrow
 unittest
 {
-    assert(simple_hash("abc") != simple_hash("ab"));
-    assert(simple_hash(123) != simple_hash(12));
+    string s1 = "abc";
+    string s2 = "abcd";
+    assert(s1 !is s2);
+    assert(simpleHash(s1) == simpleHash(s2[0 .. 3]));
+    assert(simpleHash("abc") != simpleHash("ab"));
+    assert(simpleHash(123) != simpleHash(12));
 }
 
+/// internal list to store conflicted keys
 struct LinkedList(T)
 {
-    T value;
+    T data;
     LinkedList!T* next;
 }
 
 /// Dictionary to store key-value pairs
-struct Dict(Key, Value, size_t HASH_SIZE = 1024)
+struct Dict(Key, Value, size_t HASH_SIZE = 1024, alias hashfun = simpleHash)
 {
-    @nogc nothrow:
-
+    /// Key-value pair
     struct Item
     {
         Key key;
@@ -44,54 +51,84 @@ struct Dict(Key, Value, size_t HASH_SIZE = 1024)
     }
 
     alias List = LinkedList!Item;
+
+    /// internal list to store conflicted keys
     List*[HASH_SIZE] payload;
+
+    /// the number of items
     size_t length = 0;
 
-    void put(Key k, Value v)
+    /// free payload
+    ~this()
     {
-        auto vp = this.get(k);
-        if (vp !is null)
+        foreach (ref p; payload)
         {
-            *vp = v;
-        }
-        else
-        {
-            import core.stdc.stdlib : malloc;
+            import core.stdc.stdlib : free;
 
-            ++length;
+            if (p is null) continue;
 
-            auto newItem = cast(List*) malloc(List.sizeof);
-            *newItem = List(Item(k, v), null);
-
-            auto i = simple_hash(k) % this.payload.length;
-            auto p = this.payload[i];
-            if (p is null)
+            auto ptr = p.next;
+            p = null;
+            while (ptr !is null)
             {
-                this.payload[i] = newItem;
-                return;
-            }
-            else
-            {
-                while (p.next != null) p = p.next;
-                p.next = newItem;
+                auto next = ptr.next;
+                free(ptr);
+                ptr = next;
             }
         }
     }
 
+    /// get index of key on payload
+    size_t indexOf(Key k)
+    {
+        return hashfun(k) % this.payload.length;
+    }
+
+    /// put new item
+    void put(Key k, Value v)
+    {
+        import core.stdc.stdlib : malloc;
+
+        auto vp = this.get(k);
+        if (vp !is null)
+        {
+            *vp = v;
+            return;
+        }
+
+        // put new item
+        ++length;
+        auto newItem = cast(List*) malloc(List.sizeof);
+        *newItem = List(Item(k, v), null);
+        auto i = this.indexOf(k);
+        auto p = this.payload[i];
+
+        // put in the front of list
+        if (p is null)
+        {
+            this.payload[i] = newItem;
+            return;
+        }
+
+        // put in the back of list
+        while (p.next != null) p = p.next;
+        p.next = newItem;
+    }
+
+    /// get value of key
     Value* get(Key k)
     {
-        auto i = simple_hash(k) % this.payload.length;
-        for (auto p = this.payload[i]; p != null; p = p.next)
+        for (auto p = this.payload[this.indexOf(k)]; p != null; p = p.next)
         {
-            if (p.value.key == k)
-                return &p.value.value;
+            if (p.data.key == k)
+                return &p.data.value;
         }
         return null;
     }
 }
 
 ///
-// @nogc nothrow
+@nogc nothrow
 unittest
 {
     Dict!(int, string) d;
@@ -102,4 +139,7 @@ unittest
 
     d.put(123, "hi");
     assert(*d.get(123) == "hi");
+
+    d.put(1, "");
+    assert(*d.get(1) == "");
 }
