@@ -119,6 +119,7 @@ void clearTopLevel()
 {
     globalStack.length = 0;
     globalNames.length = 0;
+    initTopLevel();
 }
 
 /// Push an array object to globalStack
@@ -131,10 +132,15 @@ void pushExecArray(int* parserState)
     Token token;
     while (true)
     {
+        // read next token
         *parserState = parseOne(&token, *parserState);
         assert(token.lexType != LexicalType.eof,
                "right brace (}) not found during parsing an array");
+
+        // closed
         if (token.lexType == LexicalType.rightBrace) break;
+
+        // push new item starts from the token that stored in globalStack
         if (pushOne(&token, parserState))
         {
             auto x = globalStack.pop();
@@ -195,7 +201,9 @@ void pushInput()
     Token token;
     with (LexicalType)
     {
-        for (auto state = parseOne(&token); token.lexType != eof; state = parseOne(&token, state))
+        for (auto state = parseOne(&token);
+             token.lexType != eof;
+             state = parseOne(&token, state))
         {
             pushOne(&token, &state);
         }
@@ -287,47 +295,120 @@ unittest
     assert(b.value.number == 123);
 }
 
-/// test eval executable array of numbers
+/// test push some arrays
 unittest
 {
     import cl_getc : cl_getc_set_src;
 
-    scope (exit) clearTopLevel();
-
-    cl_getc_set_src("{123 456}");
-    eval();
-    auto a = globalStack.pop();
-    assert(a.type == PSType.array);
-
-    with (a.value.array)
     {
-        assert(length == 2);
-        assert(at(0).type == PSType.number);
-        assert(at(0).value.number == 123);
-        assert(at(1).type == PSType.number);
-        assert(at(1).value.number == 456);
+        cl_getc_set_src("{1}");
+        pushInput();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.array);
+        with (a.value.array)
+        {
+            assert(length == 1);
+            assert(at(0).type == PSType.number);
+            assert(at(0).value.number == 1);
+        }
+        clearTopLevel();
     }
-}
-
-/// test eval executable array like function
-unittest
-{
-    import cl_getc : cl_getc_set_src;
-
-    scope (exit) clearTopLevel();
-
-    cl_getc_set_src("{123 add}");
-    eval();
-    auto a = globalStack.pop();
-    assert(a.type == PSType.array);
-
-    with (a.value.array)
     {
-        assert(length == 2);
-        assert(at(0).type == PSType.number);
-        assert(at(0).value.number == 123);
-        assert(at(1).type == PSType.name);
-        assert(at(1).value.name == "add");
+        cl_getc_set_src("{/abc}");
+        pushInput();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.array);
+        with (a.value.array)
+        {
+            assert(length == 1);
+            assert(at(0).type == PSType.name);
+            assert(at(0).value.name == "abc");
+        }
+        clearTopLevel();
+    }
+    {
+        cl_getc_set_src("{abc}");
+        pushInput();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.array);
+        with (a.value.array)
+        {
+            assert(length == 1);
+            assert(at(0).type == PSType.name);
+            assert(at(0).value.name == "abc");
+        }
+        clearTopLevel();
+    }
+    {
+        cl_getc_set_src("{1 2}");
+        pushInput();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.array);
+        with (a.value.array)
+        {
+            assert(length == 2);
+            assert(at(0).type == PSType.number);
+            assert(at(0).value.number == 1);
+            assert(at(1).type == PSType.number);
+            assert(at(1).value.number == 2);
+        }
+        clearTopLevel();
+    }
+    {
+        cl_getc_set_src("{1} {2}");
+        pushInput();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.array);
+        with (a.value.array)
+        {
+            assert(length == 1);
+            assert(at(0).type == PSType.number);
+            assert(at(0).value.number == 2);
+        }
+        a = globalStack.pop();
+        assert(a.type == PSType.array);
+        with (a.value.array)
+        {
+            assert(length == 1);
+            assert(at(0).type == PSType.number);
+            assert(at(0).value.number == 1);
+        }
+        clearTopLevel();
+    }
+    {
+        cl_getc_set_src("{1 {2} 3}");
+        pushInput();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.array);
+        with (a.value.array)
+        {
+            assert(length == 3);
+            assert(at(0).type == PSType.number);
+            assert(at(0).value.number == 1);
+            assert(at(1).type == PSType.array);
+            assert(at(1).value.array.length == 1);
+            assert(at(1).value.array.at(0).type == PSType.number);
+            assert(at(1).value.array.at(0).value.number == 2);
+            assert(at(2).type == PSType.number);
+            assert(at(2).value.number == 3);
+        }
+        clearTopLevel();
+    }
+    {
+        cl_getc_set_src("{123 add}");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.array);
+
+        with (a.value.array)
+        {
+            assert(length == 2);
+            assert(at(0).type == PSType.number);
+            assert(at(0).value.number == 123);
+            assert(at(1).type == PSType.name);
+            assert(at(1).value.name == "add");
+        }
+        clearTopLevel();
     }
 }
 
