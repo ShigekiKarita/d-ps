@@ -29,14 +29,39 @@ struct PSObject
 {
     PSType type;
     PSValue value;
+
+    void print()
+    {
+        import core.stdc.stdio : printf;
+
+        with (PSType)
+        final switch (type)
+        {
+        case undefined:
+            printf("undefined");
+            return;
+        case number:
+            printf("%d", value.number);
+            return;
+        case executableName:
+            printf("%s", value.name.ptr);
+            return;
+        case literalName:
+            printf("/%s", value.name.ptr);
+            return;
+        case func:
+            printf("<builtin function>");
+            return;
+        }
+    }
 }
 
 /// Global stack for eval()
 Stack!PSObject globalStack;
 Dict!(string, PSObject) globalNames;
 
-/// Global initialization
-static this()
+/// Top level (global) data initialization
+void initTopLevel()
 {
     import builtin;
 
@@ -58,6 +83,11 @@ static this()
 
     o.value.func = &divOp;
     globalNames.put("div", o);
+}
+
+static this()
+{
+    initTopLevel();
 }
 
 /// Clear top level (global) data

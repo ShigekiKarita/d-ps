@@ -1,9 +1,12 @@
 import core.stdc.stdio;
 import cl_getc : cl_getc_set_src;
-import eval : eval, globalStack, PSType;
+import eval : eval, globalStack, PSType, initTopLevel;
+
 
 void main()
 {
+    initTopLevel();
+
     char[1024] buf;
     buf[$ - 1] = 1;
     printf(">>> ");
@@ -16,8 +19,10 @@ void main()
         {
             auto top = globalStack.pop();
             assert(globalStack.length == 0, "stack is not empty after eval()");
-            assert(top.type == PSType.number, "unsupported type to print");
-            printf("%d\n", top.value.number);
+            // assert(top.type == PSType.number, "unsupported type to print");
+            // printf("%d\n", top.value.number);
+            top.print();
+            printf("\n");
         }
         printf(">>> ");
     }

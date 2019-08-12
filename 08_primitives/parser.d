@@ -67,11 +67,11 @@ int parseOne(Token* result, int prev)
         return prev;
     }
     // parse space
-    else if (isspace(prev))
+    else if (isspace(prev) || prev == '\n')
     {
         result.lexType = LexicalType.space;
         // consume subsequent spaces
-        while (isspace(prev))
+        while (isspace(prev) || prev == '\n')
         {
             prev = cl_getc();
         }
@@ -131,7 +131,7 @@ int parseOne(Token* result, int prev)
         }
         auto p = cast(char*) malloc(char.sizeof * n);
         strncpy(p, s, n);
-        p[n] = 0;
+        p[n - 1] = 0;
         result.value.name = cast(string) p[0 .. n - 1];
         return prev;
     }
@@ -172,24 +172,25 @@ unittest
     import cl_getc : cl_getc_set_src;
 
     Token token;
-    cl_getc_set_src("add_ 123");
+    cl_getc_set_src("1 2 add\n");
+
     auto prev = parseOne(&token);
-    assert(prev == ' ');
-    assert(token.lexType == LexicalType.executableName);
-    assert(token.value.name == "add_");
+    assert(token.lexType == LexicalType.number);
+    assert(token.value.number == 1);
 
     prev = parseOne(&token, prev);
-    assert(prev == '1');
     assert(token.lexType == LexicalType.space);
 
     prev = parseOne(&token, prev);
-    assert(prev == EOF);
     assert(token.lexType == LexicalType.number);
-    assert(token.value.number == 123);
+    assert(token.value.number == 2);
 
     prev = parseOne(&token, prev);
-    assert(prev == EOF);
-    assert(token.lexType == LexicalType.eof);
+    assert(token.lexType == LexicalType.space);
+
+    prev = parseOne(&token, prev);
+    assert(token.lexType == LexicalType.executableName);
+    assert(token.value.name == "add", token.value.name);
 }
 
 /// test parse a literal name
