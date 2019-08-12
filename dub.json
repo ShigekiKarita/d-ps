@@ -98,6 +98,26 @@
           "dflags": ["-dip25", "-dip1000", "-betterC"]
         }
       }
+    },
+    {
+      "name": "07_hash_table",
+      "targetType": "executable",
+      "sourcePaths": ["07_hash_table"],
+      "importPaths": ["07_hash_table"],
+      "buildTypes": {
+        "unittest": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000"]
+        },
+        "debug": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        },
+        "release": {
+          "buildOptions": ["releaseMode", "optimize", "inline"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        }
+      }
     }
   ]
 }
