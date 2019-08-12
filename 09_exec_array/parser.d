@@ -124,7 +124,7 @@ int parseOne(Token* result, int prev)
         }
         const s = input + pos - 1;
         size_t n = 1;
-        while (isgraph(prev))
+        while (isgraph(prev) && prev != '{' && prev != '}')
         {
             prev = cl_getc();
             ++n;

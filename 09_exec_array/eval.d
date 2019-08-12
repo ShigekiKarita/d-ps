@@ -289,3 +289,25 @@ unittest
         assert(at(1).value.number == 456);
     }
 }
+
+/// test eval executable array like function
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+
+    cl_getc_set_src("{123 add}");
+    eval();
+    auto a = globalStack.pop();
+    assert(a.type == PSType.array);
+
+    with (a.value.array)
+    {
+        assert(length == 2);
+        assert(at(0).type == PSType.number);
+        assert(at(0).value.number == 123);
+        assert(at(1).type == PSType.name);
+        assert(at(1).value.name == "add");
+    }
+}
