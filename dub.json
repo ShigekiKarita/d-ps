@@ -158,6 +158,26 @@
           "dflags": ["-dip25", "-dip1000", "-betterC"]
         }
       }
+    },
+    {
+      "name": "10_control_stack",
+      "targetType": "executable",
+      "sourcePaths": ["10_control_stack"],
+      "importPaths": ["10_control_stack"],
+      "buildTypes": {
+        "unittest": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000"]
+        },
+        "debug": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        },
+        "release": {
+          "buildOptions": ["releaseMode", "optimize", "inline"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        }
+      }
     }
   ]
 }
