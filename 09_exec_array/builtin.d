@@ -10,11 +10,10 @@ void defOp()
     // get args
     executeStack();
     auto a = globalStack.pop();
-    assert(a.type == PSType.number, "1st arg of add should be number");
 
     executeStack();
     auto b = globalStack.pop();
-    assert(b.type == PSType.name, "2nd arg of add should be literal name");
+    assert(b.type == PSType.name, "1st arg of add should be literal name: e.g., /foo 1 def");
 
     // put name into global dict
     globalNames.put(b.value.name, a);
@@ -30,6 +29,7 @@ unittest
     cl_getc_set_src("/abc 12 def");
     eval();
     auto abc = globalNames.get("abc");
+    assert(abc);
     assert(abc.type == PSType.number);
     assert(abc.value.number == 12);
 
@@ -38,6 +38,15 @@ unittest
     auto a = globalStack.pop();
     assert(a.type == PSType.number);
     assert(a.value.number == 1 + 12);
+
+    cl_getc_set_src("abc");
+    eval();
+    auto b = globalStack.pop();
+    import eval : execute;
+    execute(&b);
+    auto e = globalStack.pop();
+    assert(e.type == PSType.number);
+    // assert(b.value.number == 12);
 }
 
 /// builtin add function

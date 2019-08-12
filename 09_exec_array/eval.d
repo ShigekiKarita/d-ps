@@ -12,8 +12,6 @@ enum PSType
 {
     undefined,
     number,
-    // executableName,
-    // literalName,
     name,
     func,
     array
@@ -123,7 +121,7 @@ void clearTopLevel()
 }
 
 /// Push an array object to globalStack
-void pushExecArray(int* parserState)
+void pushArray(int* parserState)
 {
     import parser : parseOne, Token, LexicalType;
 
@@ -183,7 +181,7 @@ bool pushOne(const Token* token, int* state)
             globalStack.push(object);
             return true;
         case leftBrace:
-            pushExecArray(state);
+            pushArray(state);
             return true;
         default:
             fprintf(stderr, "unsupported token during parsing: %d\n", token.lexType);
@@ -210,46 +208,60 @@ void pushInput()
     }
 }
 
+void execute(PSObject* object)
+{
+    import core.stdc.stdio : fprintf, stderr;
+
+    with (PSType)
+    {
+        final switch (object.type)
+        {
+        case name:
+            auto k = object.value.name;
+            auto p = globalNames.get(k);
+            if (p is null)
+            {
+                fprintf(stderr, "undefined name in eval(): %s\n", k.ptr);
+                assert(false);
+            }
+            if (p.type == array)
+            {
+                with (p.value.array)
+                {
+                    foreach (i; 0 .. length)
+                    {
+                        auto o = at(i);
+                        // execute(&o);
+                        globalStack.push(o);
+                    }
+                }
+                executeStack();
+            }
+            else
+            {
+                execute(p);
+            }
+            return;
+        case func:
+            object.value.func();
+            return;
+        case array:
+        case number:
+            globalStack.push(*object);
+            return;
+        case undefined:
+            assert(false, "undefined found during execution");
+        }
+    }
+}
 
 /// Execute names in the global stack for eval()
 void executeStack()
 {
-    import core.stdc.stdio : fprintf, stderr;
-
-    bool end = false;
-    while (globalStack.length > 1 && !end)
+    if (globalStack.length > 1)
     {
         auto top = globalStack.pop();
-        with (PSType)
-        {
-            switch (top.type)
-            {
-            case name:
-                auto name = top.value.name;
-                auto object = globalNames.get(name);
-                if (object is null)
-                {
-                    fprintf(stderr, "undefined name in eval(): %s\n", top.value.name.ptr);
-                    assert(false);
-                }
-                else if (object.type == func)
-                {
-                    object.value.func();
-                }
-                else
-                {
-                    globalStack.push(*object);
-                }
-                break;
-            case number:
-                globalStack.push(top);
-                end = true;
-                break;
-            default:
-                fprintf(stderr, "unsupported type for eval(): %d\n", top.type);
-                assert(false);
-            }
-        }
+        execute(&top);
     }
 }
 
@@ -415,22 +427,50 @@ unittest
 /// test eval executable nested array
 unittest
 {
+    import core.stdc.stdio : printf;
     import cl_getc : cl_getc_set_src;
 
-    scope (exit) clearTopLevel();
-
-    cl_getc_set_src("/abc { 12 34 /efg { add } def } def");
-    // eval();
-    pushInput();
-    printGlobalStack();
-    // auto a = globalStack.pop();
-    // assert(a.type == PSType.array);
-    // with (a.value.array)
+    {
+        cl_getc_set_src("/addone {1 add} def");
+        eval();
+        cl_getc_set_src("2 addone");
+        eval();
+        auto top = globalStack.pop();
+        assert(top.type == PSType.number);
+        assert(top.value.number == 2 + 1);
+        clearTopLevel();
+    }
     // {
-    //     assert(length == 2);
-    //     assert(at(0).type == PSType.number);
-    //     assert(at(0).value.number == 123);
-    //     assert(at(1).type == PSType.name);
-    //     assert(at(1).value.name == "add");
+    //     cl_getc_set_src("/abc {1 2 add} def");
+    //     eval();
+    //     cl_getc_set_src("abc");
+    //     eval();
+    //     printGlobalStack();
+    //     auto top = globalStack.pop();
+    //     assert(top.type == PSType.number);
+    //     assert(top.value.number == 2 + 1);
+    //     clearTopLevel();
     // }
+    // cl_getc_set_src("/abc { 12 34 /efg { add } def } def");
+    // eval();
+
+    // cl_getc_set_src("/ZZ {6} def");
+    // eval();
+    // cl_getc_set_src("/YY {4 5 ZZ} def");
+    // eval();
+    // cl_getc_set_src("/XX {1 2 3 YY 7} def");
+    // eval();
+    // auto xx = globalNames.get("XX");
+    // assert(xx.type == PSType.array);
+    // xx.print();
+    // printf("\n");
+    // with (xx.value.array)
+    // {
+    //     assert(length == 7);
+    //     foreach (i; 0 .. length)
+    //     {
+    //         assert(at(i).value.number == i + 1);
+    //     }
+    // }
+    clearTopLevel();
 }
