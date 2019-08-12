@@ -18,6 +18,12 @@ struct Stack(T, size_t N = 1024)
         --length;
         return payload[length];
     }
+
+    T* top()
+    {
+        if (length == 0) return null;
+        return this.payload.ptr + length - 1;
+    }
 }
 
 unittest
@@ -26,8 +32,10 @@ unittest
     s.push(2);
     s.push(1);
     assert(s.length == 2);
+    assert(*s.top == 1);
     assert(s.pop() == 1);
     assert(s.length == 1);
+    assert(*s.top == 2);
     assert(s.pop() == 2);
     assert(s.length == 0);
 }

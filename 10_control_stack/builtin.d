@@ -59,9 +59,7 @@ void ifelseOp()
     auto a = globalStack.pop();
     auto b = globalStack.pop();
     auto cond = globalStack.pop();
-    assert(cond.type == PSType.number, "cond shoule be number in <ifelse>: e.g., 0 {add} {sub} ifelse");
-
-    auto ret = cond.value.number == 0 ? a : b;
+    auto ret = (cond.type == PSType.number && cond.value.number == 0) ? a : b;
     execute(&ret);
 }
 
@@ -87,6 +85,41 @@ unittest
     }
 }
 
+/// builtin while
+void whileOp()
+{
+    import eval : execute;
+
+    while (true)
+    {
+        auto a = globalStack.pop();
+        execute(&a);
+        auto top = globalStack.top;
+
+        if (top is null) return;
+        if (top.type == PSType.number && top.value.number == 0) return;
+
+        auto b = globalStack.pop();
+        execute(&b);
+    }
+}
+
+/// test eval while
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+    {
+        cl_getc_set_src("/abc 1 def");
+        eval();
+        cl_getc_set_src("{abc} {/abc 0 def} while");
+        eval();
+        auto top = globalStack.pop();
+        assert(top.type == PSType.number);
+        assert(top.value.number == 0);
+    }
+}
 
 /*****************
  numeric operators

@@ -97,6 +97,9 @@ void initTopLevel()
     o.value.func = &ifelseOp;
     globalNames.put("ifelse", o);
 
+    o.value.func = &whileOp;
+    globalNames.put("while", o);
+
     o.value.func = &addOp;
     globalNames.put("add", o);
 
