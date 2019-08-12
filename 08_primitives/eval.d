@@ -44,11 +44,20 @@ static this()
     PSObject o;
     o.type = PSType.func;
 
+    o.value.func = &defOp;
+    globalNames.put("def", o);
+
     o.value.func = &addOp;
     globalNames.put("add", o);
 
-    o.value.func = &defOp;
-    globalNames.put("def", o);
+    o.value.func = &subOp;
+    globalNames.put("sub", o);
+
+    o.value.func = &mulOp;
+    globalNames.put("mul", o);
+
+    o.value.func = &divOp;
+    globalNames.put("div", o);
 }
 
 /// Clear top level (global) data
@@ -180,52 +189,4 @@ unittest
     assert(a.value.number == 456);
     assert(b.type == PSType.number);
     assert(b.value.number == 123);
-}
-
-/// test eval add two numbers
-unittest
-{
-    import cl_getc : cl_getc_set_src;
-
-    scope (exit) clearTopLevel();
-
-    cl_getc_set_src("123 456 add");
-    eval();
-    auto a = globalStack.pop();
-    assert(a.type == PSType.number);
-    assert(a.value.number == 123 + 456);
-}
-
-/// test eval nested add
-unittest
-{
-    import cl_getc : cl_getc_set_src;
-
-    scope (exit) clearTopLevel();
-
-    cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); // 1 2 3 add add");
-    eval();
-    auto a = globalStack.pop();
-    assert(a.type == PSType.number);
-    assert(a.value.number == 45);
-}
-
-/// test eval def
-unittest
-{
-    import cl_getc : cl_getc_set_src;
-
-    scope (exit) clearTopLevel();
-
-    cl_getc_set_src("/abc 12 def");
-    eval();
-    auto abc = globalNames.get("abc");
-    assert(abc.type == PSType.number);
-    assert(abc.value.number == 12);
-
-    cl_getc_set_src("1 abc add");
-    eval();
-    auto a = globalStack.pop();
-    assert(a.type == PSType.number);
-    assert(a.value.number == 1 + 12);
 }
