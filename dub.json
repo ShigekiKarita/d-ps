@@ -78,6 +78,26 @@
           "dflags": ["-dip25", "-dip1000", "-betterC"]
         }
       }
+    },
+    {
+      "name": "06_literal_name",
+      "targetType": "executable",
+      "sourcePaths": ["06_literal_name"],
+      "importPaths": ["06_literal_name"],
+      "buildTypes": {
+        "unittest": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000"]
+        },
+        "debug": {
+          "buildOptions": ["unittests", "debugMode", "debugInfo"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        },
+        "release": {
+          "buildOptions": ["releaseMode", "optimize", "inline"],
+          "dflags": ["-dip25", "-dip1000", "-betterC"]
+        }
+      }
     }
   ]
 }
