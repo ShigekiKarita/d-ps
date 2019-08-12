@@ -11,12 +11,13 @@ void defOp()
     executeStack();
     auto a = globalStack.pop();
 
-    executeStack();
+    // executeStack();
     auto b = globalStack.pop();
     assert(b.type == PSType.name, "1st arg of add should be literal name: e.g., /foo 1 def");
 
     // put name into global dict
     globalNames.put(b.value.name, a);
+    globalStack.push(a);
 }
 
 /// test eval def
@@ -42,11 +43,8 @@ unittest
     cl_getc_set_src("abc");
     eval();
     auto b = globalStack.pop();
-    import eval : execute;
-    execute(&b);
-    auto e = globalStack.pop();
-    assert(e.type == PSType.number);
-    // assert(b.value.number == 12);
+    assert(b.type == PSType.number);
+    assert(b.value.number == 12);
 }
 
 /// builtin add function

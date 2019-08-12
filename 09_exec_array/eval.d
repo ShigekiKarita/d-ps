@@ -240,6 +240,7 @@ void execute(PSObject* object)
             else
             {
                 execute(p);
+                executeStack();
             }
             return;
         case func:
@@ -258,7 +259,7 @@ void execute(PSObject* object)
 /// Execute names in the global stack for eval()
 void executeStack()
 {
-    if (globalStack.length > 1)
+    if (globalStack.length > 0)
     {
         auto top = globalStack.pop();
         execute(&top);
@@ -440,6 +441,18 @@ unittest
         assert(top.value.number == 2 + 1);
         clearTopLevel();
     }
+
+    {
+        cl_getc_set_src("/onetwo {1 2} def");
+        eval();
+        cl_getc_set_src("onetwo add");
+        eval();
+        auto top = globalStack.pop();
+        assert(top.type == PSType.number);
+        assert(top.value.number == 2 + 1);
+        clearTopLevel();
+    }
+
     // {
     //     cl_getc_set_src("/abc {1 2 add} def");
     //     eval();
