@@ -1,0 +1,24 @@
+version: 2
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-dmd
+      - test-ldc
+jobs:
+  test-dmd:
+    docker:
+      - image: circleci/buildpack-deps:18.04
+    steps:
+      - checkout
+      - run:
+          name: test
+          command: .circleci/test.sh dmd
+  test-ldc:
+    docker:
+      - image: circleci/buildpack-deps:18.04
+    steps:
+      - checkout
+      - run:
+          name: test
+          command: .circleci/test.sh ldc

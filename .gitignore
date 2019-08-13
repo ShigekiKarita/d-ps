@@ -4,6 +4,8 @@
 !*.md
 !dub.json
 !.gitignore
+!*.yml
+!*.sh
 
 .dub
 docs.json
