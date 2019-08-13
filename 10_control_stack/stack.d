@@ -5,6 +5,11 @@ struct Stack(T, size_t N = 1024)
     T[N] payload;
     size_t length = 0;
 
+    bool empty() pure
+    {
+        return length == 0;
+    }
+
     void push(T item)
     {
         assert(length < payload.length, "stack overflow");
@@ -19,7 +24,7 @@ struct Stack(T, size_t N = 1024)
         return payload[length];
     }
 
-    T* top()
+    T* top() pure
     {
         if (length == 0) return null;
         return this.payload.ptr + length - 1;

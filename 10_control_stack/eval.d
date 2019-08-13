@@ -85,32 +85,8 @@ void printGlobalStack()
 /// Top level (global) data initialization
 void initTopLevel()
 {
-    import builtin;
-
-    // register builtin functions
-    PSObject o;
-    o.type = PSType.func;
-
-    o.value.func = &defOp;
-    globalNames.put("def", o);
-
-    o.value.func = &ifelseOp;
-    globalNames.put("ifelse", o);
-
-    o.value.func = &whileOp;
-    globalNames.put("while", o);
-
-    o.value.func = &binaryOp!"+";
-    globalNames.put("add", o);
-
-    o.value.func = &binaryOp!"-";
-    globalNames.put("sub", o);
-
-    o.value.func = &binaryOp!"*";
-    globalNames.put("mul", o);
-
-    o.value.func = &binaryOp!"/";
-    globalNames.put("div", o);
+    import builtin : registerBuiltinOps;
+    registerBuiltinOps();
 }
 
 static this()

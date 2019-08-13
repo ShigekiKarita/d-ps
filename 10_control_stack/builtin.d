@@ -4,6 +4,55 @@ module builtin;
 
 import eval : eval, executeStack, globalNames, globalStack, PSObject, PSType, clearTopLevel;
 
+void registerBuiltinOps()
+{
+    // register builtin functions
+    PSObject o;
+    o.type = PSType.func;
+
+    // special ops
+    o.value.func = &defOp;
+    globalNames.put("def", o);
+
+    o.value.func = &ifelseOp;
+    globalNames.put("ifelse", o);
+
+    o.value.func = &whileOp;
+    globalNames.put("while", o);
+
+    // numerical ops
+    o.value.func = &binaryOp!"+";
+    globalNames.put("add", o);
+
+    o.value.func = &binaryOp!"-";
+    globalNames.put("sub", o);
+
+    o.value.func = &binaryOp!"*";
+    globalNames.put("mul", o);
+
+    o.value.func = &binaryOp!"/";
+    globalNames.put("div", o);
+
+    // logical ops
+    o.value.func = &binaryOp!"==";
+    globalNames.put("eq", o);
+
+    o.value.func = &binaryOp!"!=";
+    globalNames.put("neq", o);
+
+    o.value.func = &binaryOp!">";
+    globalNames.put("gt", o);
+
+    o.value.func = &binaryOp!">=";
+    globalNames.put("ge", o);
+
+    o.value.func = &binaryOp!"<";
+    globalNames.put("lt", o);
+
+    o.value.func = &binaryOp!"<=";
+    globalNames.put("le", o);
+}
+
 /*****************
  special operators
  *****************/
@@ -157,7 +206,7 @@ void binaryOp(string op)()
     // set return value
     PSObject ret;
     ret.type = PSType.number;
-    mixin("ret.value.number = b.value.number " ~ op ~ " a.value.number;");
+    mixin("ret.value.number = cast(int) b.value.number " ~ op ~ " a.value.number;");
     globalStack.push(ret);
 }
 
@@ -229,4 +278,109 @@ unittest
     auto a = globalStack.pop();
     assert(a.type == PSType.number);
     assert(a.value.number == 7 / 3);
+}
+
+/// test logical ops
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+
+    {
+        cl_getc_set_src("3 3 eq");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 1);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("3 2 eq");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 0);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("3 3 neq");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 0);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("3 2 neq");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 1);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("3 3 gt");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 0);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("3 2 gt");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 1);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("3 3 ge");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 1);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("2 3 ge");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 0);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("2 3 lt");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 1);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("3 3 lt");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 0);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("3 3 le");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 1);
+        assert(globalStack.empty);
+    }
+    {
+        cl_getc_set_src("3 2 le");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 0);
+        assert(globalStack.empty);
+    }
 }
