@@ -100,16 +100,16 @@ void initTopLevel()
     o.value.func = &whileOp;
     globalNames.put("while", o);
 
-    o.value.func = &addOp;
+    o.value.func = &binaryOp!"+";
     globalNames.put("add", o);
 
-    o.value.func = &subOp;
+    o.value.func = &binaryOp!"-";
     globalNames.put("sub", o);
 
-    o.value.func = &mulOp;
+    o.value.func = &binaryOp!"*";
     globalNames.put("mul", o);
 
-    o.value.func = &divOp;
+    o.value.func = &binaryOp!"/";
     globalNames.put("div", o);
 }
 

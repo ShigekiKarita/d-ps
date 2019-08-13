@@ -19,6 +19,7 @@ void main()
         {
             auto top = globalStack.pop();
             top.print();
+            printf("\n");
         }
         printf(">>> ");
     }

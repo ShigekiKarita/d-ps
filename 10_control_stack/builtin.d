@@ -19,8 +19,7 @@ void defOp()
 
     // put name into global dict
     globalNames.put(b.value.name, a);
-
-    // NOTE: rethinking return value?
+    // NOTE: push nothing?
     // globalStack.push(a);
 }
 
@@ -54,10 +53,11 @@ unittest
 /// builtin ifelse function
 void ifelseOp()
 {
-    import eval : execute;
+    import eval : execute, executeStack;
 
     auto a = globalStack.pop();
     auto b = globalStack.pop();
+    executeStack();
     auto cond = globalStack.pop();
     auto ret = (cond.type == PSType.number && cond.value.number == 0) ? a : b;
     execute(&ret);
@@ -82,6 +82,24 @@ unittest
         auto top = globalStack.pop();
         assert(top.type == PSType.number);
         assert(top.value.number == 2);
+    }
+    {
+        cl_getc_set_src("/abc 0 def");
+        eval();
+        cl_getc_set_src("0 abc {1 add} {2 add} ifelse");
+        eval();
+        auto top = globalStack.pop();
+        assert(top.type == PSType.number);
+        assert(top.value.number == 2);
+    }
+    {
+        cl_getc_set_src("/abc 1 def");
+        eval();
+        cl_getc_set_src("0 abc {1 add} {2 add} ifelse");
+        eval();
+        auto top = globalStack.pop();
+        assert(top.type == PSType.number);
+        assert(top.value.number == 1);
     }
 }
 
@@ -125,22 +143,21 @@ unittest
  numeric operators
  *****************/
 
-/// builtin add function
-void addOp()
+void binaryOp(string op)()
 {
     // get args
     executeStack();
     auto a = globalStack.pop();
-    assert(a.type == PSType.number, "1st arg of `add` should be number");
+    assert(a.type == PSType.number, "1st arg of `sub` should be number");
 
     executeStack();
     auto b = globalStack.pop();
-    assert(b.type == PSType.number, "2nd arg of `add` should be number");
+    assert(b.type == PSType.number, "2nd arg of `sub` should be number");
 
     // set return value
     PSObject ret;
     ret.type = PSType.number;
-    ret.value.number = a.value.number + b.value.number;
+    mixin("ret.value.number = b.value.number " ~ op ~ " a.value.number;");
     globalStack.push(ret);
 }
 
@@ -172,25 +189,6 @@ unittest
     assert(a.value.number == 45);
 }
 
-/// builtin sub function
-void subOp()
-{
-    // get args
-    executeStack();
-    auto a = globalStack.pop();
-    assert(a.type == PSType.number, "1st arg of `sub` should be number");
-
-    executeStack();
-    auto b = globalStack.pop();
-    assert(b.type == PSType.number, "2nd arg of `sub` should be number");
-
-    // set return value
-    PSObject ret;
-    ret.type = PSType.number;
-    ret.value.number = b.value.number - a.value.number;
-    globalStack.push(ret);
-}
-
 /// test eval sub two numbers
 unittest
 {
@@ -205,25 +203,6 @@ unittest
     assert(a.value.number == 5 - 3);
 }
 
-/// builtin mul function
-void mulOp()
-{
-    // get args
-    executeStack();
-    auto a = globalStack.pop();
-    assert(a.type == PSType.number, "1st arg of `mul` should be number");
-
-    executeStack();
-    auto b = globalStack.pop();
-    assert(b.type == PSType.number, "2nd arg of `mul` should be number");
-
-    // set return value
-    PSObject ret;
-    ret.type = PSType.number;
-    ret.value.number = b.value.number * a.value.number;
-    globalStack.push(ret);
-}
-
 /// test eval mul two numbers
 unittest
 {
@@ -236,25 +215,6 @@ unittest
     auto a = globalStack.pop();
     assert(a.type == PSType.number);
     assert(a.value.number == 5 * 3);
-}
-
-/// builtin div function
-void divOp()
-{
-    // get args
-    executeStack();
-    auto a = globalStack.pop();
-    assert(a.type == PSType.number, "1st arg of `div` should be number");
-
-    executeStack();
-    auto b = globalStack.pop();
-    assert(b.type == PSType.number, "2nd arg of `div` should be number");
-
-    // set return value
-    PSObject ret;
-    ret.type = PSType.number;
-    ret.value.number = b.value.number / a.value.number;
-    globalStack.push(ret);
 }
 
 /// test eval div two numbers
