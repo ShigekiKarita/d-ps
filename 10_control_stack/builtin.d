@@ -17,6 +17,12 @@ void registerBuiltinOps()
     o.value.func = &ifelseOp;
     globalNames.put("ifelse", o);
 
+    o.value.func = &ifOp;
+    globalNames.put("if", o);
+
+    o.value.func = &repeatOp;
+    globalNames.put("repeat", o);
+
     o.value.func = &whileOp;
     globalNames.put("while", o);
 
@@ -88,7 +94,7 @@ void defOp()
     // globalStack.push(a);
 }
 
-/// test eval def
+///
 unittest
 {
     import cl_getc : cl_getc_set_src;
@@ -128,7 +134,7 @@ void ifelseOp()
     execute(&ret);
 }
 
-/// test eval ifelse
+///
 unittest
 {
     import cl_getc : cl_getc_set_src;
@@ -167,6 +173,79 @@ unittest
         assert(top.value.number == 1);
     }
 }
+
+/// builtin ifelse function
+void ifOp()
+{
+    import eval : execute, executeStack;
+
+    auto a = globalStack.pop();
+    executeStack();
+    auto cond = globalStack.pop();
+    if (!(cond.type == PSType.number && cond.value.number == 0))
+    {
+        execute(&a);
+    }
+}
+
+///
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+    {
+        cl_getc_set_src("0 1 {1 add} if");
+        eval();
+        auto top = globalStack.pop();
+        assert(top.type == PSType.number);
+        assert(top.value.number == 1);
+    }
+    {
+        cl_getc_set_src("0 0 {1 add} if");
+        eval();
+        auto top = globalStack.pop();
+        assert(top.type == PSType.number);
+        assert(top.value.number == 0);
+    }
+}
+
+/// builtin repeat function
+void repeatOp()
+{
+    import eval : execute, executeStack;
+
+    auto proc = globalStack.pop();
+    executeStack();
+    auto n = globalStack.pop();
+    assert(n.type == PSType.number, "2nd arg of repeat should be number, e.g., n proc repeat");
+    foreach (_; 0 .. n.value.number)
+    {
+        execute(&proc);
+    }
+}
+
+///
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+    {
+        cl_getc_set_src("/abc 0 def");
+        eval();
+        cl_getc_set_src("1 2 {dup} repeat");
+        eval();
+        assert(globalStack.length == 1 + 2);
+        foreach (i; 0 .. 3)
+        {
+            auto top = globalStack.pop();
+            assert(top.type == PSType.number);
+            assert(top.value.number == 1);
+        }
+    }
+}
+
 
 /// builtin while
 void whileOp()
