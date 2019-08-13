@@ -1,183 +1,180 @@
 {
-  "authors": [
-    "karita"
-  ],
-  "copyright": "Copyright © 2019, karita",
-  "description": "Tiny PostScript Interpreter",
-  "license": "BSL-1.0",
-  "name": "d-ps",
-  "subPackages": [
-    {
-      "name": "01_int_parser",
-      "targetType": "executable",
-      "sourcePaths": ["01_int_parser"],
-      "dflags": ["-dip25", "-dip1000", "-dip1008", "-betterC"]
-    },
-    {
-      "name": "02_int_parser_getc",
-      "targetType": "executable",
-      "sourcePaths": ["02_int_parser_getc"],
-      "dflags": ["-dip25", "-dip1000", "-dip1008", "-betterC"]
-    },
-    {
-      "name": "03_parser",
-      "targetType": "executable",
-      "sourcePaths": ["03_parser"],
-      "importPaths": ["03_parser"],
-      "buildTypes": {
+    "authors": [
+        "karita"
+    ],
+    "copyright": "Copyright © 2019, karita",
+    "description": "Tiny PostScript Interpreter",
+    "license": "BSL-1.0",
+    "name": "d-ps",
+    "subPackages": [
+        {
+            "name": "01_int_parser",
+            "targetType": "executable",
+            "sourcePaths": ["01_int_parser"],
+            "dflags": ["-dip25", "-dip1000", "-dip1008", "-betterC"]
+        },
+        {
+            "name": "02_int_parser_getc",
+            "targetType": "executable",
+            "sourcePaths": ["02_int_parser_getc"],
+            "dflags": ["-dip25", "-dip1000", "-dip1008", "-betterC"]
+        },
+        {
+            "name": "03_parser",
+            "targetType": "executable",
+            "sourcePaths": ["03_parser"],
+            "importPaths": ["03_parser"],
+            "buildTypes": {
+                "unittest": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000"]
+                },
+                "debug": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                },
+                "release": {
+                    "buildOptions": ["releaseMode", "optimize", "inline"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                }
+            }
+        },
+        {
+            "name": "04_stack",
+            "targetType": "executable",
+            "sourcePaths": ["04_stack"],
+            "importPaths": ["04_stack"],
+            "buildTypes": {
+                "unittest": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000"]
+                },
+                "debug": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                },
+                "release": {
+                    "buildOptions": ["releaseMode", "optimize", "inline"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                }
+            }
+        },
+        {
+            "name": "05_eval",
+            "targetType": "executable",
+            "sourcePaths": ["05_eval"],
+            "importPaths": ["05_eval"],
+            "buildTypes": {
+                "unittest": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000"]
+                },
+                "debug": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                },
+                "release": {
+                    "buildOptions": ["releaseMode", "optimize", "inline"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                }
+            }
+        },
+        {
+            "name": "06_literal_name",
+            "targetType": "executable",
+            "sourcePaths": ["06_literal_name"],
+            "importPaths": ["06_literal_name"],
+            "buildTypes": {
+                "unittest": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000"]
+                },
+                "debug": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                },
+                "release": {
+                    "buildOptions": ["releaseMode", "optimize", "inline"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                }
+            }
+        },
+        {
+            "name": "07_hash_table",
+            "targetType": "executable",
+            "sourcePaths": ["07_hash_table"],
+            "importPaths": ["07_hash_table"],
+            "buildTypes": {
+                "unittest": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000"]
+                },
+                "debug": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                },
+                "release": {
+                    "buildOptions": ["releaseMode", "optimize", "inline"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                }
+            }
+        },
+        {
+            "name": "08_primitives",
+            "targetType": "executable",
+            "sourcePaths": ["08_primitives"],
+            "importPaths": ["08_primitives"],
+            "buildTypes": {
+                "unittest": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000"]
+                },
+                "debug": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                },
+                "release": {
+                    "buildOptions": ["releaseMode", "optimize", "inline"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                }
+            }
+        },
+        {
+            "name": "09_exec_array",
+            "targetType": "executable",
+            "sourcePaths": ["09_exec_array"],
+            "importPaths": ["09_exec_array"],
+            "buildTypes": {
+                "unittest": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000"]
+                },
+                "debug": {
+                    "buildOptions": ["unittests", "debugMode", "debugInfo"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                },
+                "release": {
+                    "buildOptions": ["releaseMode", "optimize", "inline"],
+                    "dflags": ["-dip25", "-dip1000", "-betterC"]
+                }
+            }
+        }
+    ],
+    "targetType": "executable",
+    "sourcePaths": ["10_control_stack"],
+    "importPaths": ["10_control_stack"],
+    "buildTypes": {
         "unittest": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000"]
+            "buildOptions": ["unittests", "debugMode", "debugInfo"],
+            "dflags": ["-dip25", "-dip1000"]
         },
         "debug": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
+            "buildOptions": ["unittests", "debugMode", "debugInfo"],
+            "dflags": ["-dip25", "-dip1000", "-betterC"]
         },
         "release": {
-          "buildOptions": ["releaseMode", "optimize", "inline"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
+            "buildOptions": ["releaseMode", "optimize", "inline"],
+            "dflags": ["-dip25", "-dip1000", "-betterC"]
         }
-      }
-    },
-    {
-      "name": "04_stack",
-      "targetType": "executable",
-      "sourcePaths": ["04_stack"],
-      "importPaths": ["04_stack"],
-      "buildTypes": {
-        "unittest": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000"]
-        },
-        "debug": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        },
-        "release": {
-          "buildOptions": ["releaseMode", "optimize", "inline"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        }
-      }
-    },
-    {
-      "name": "05_eval",
-      "targetType": "executable",
-      "sourcePaths": ["05_eval"],
-      "importPaths": ["05_eval"],
-      "buildTypes": {
-        "unittest": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000"]
-        },
-        "debug": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        },
-        "release": {
-          "buildOptions": ["releaseMode", "optimize", "inline"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        }
-      }
-    },
-    {
-      "name": "06_literal_name",
-      "targetType": "executable",
-      "sourcePaths": ["06_literal_name"],
-      "importPaths": ["06_literal_name"],
-      "buildTypes": {
-        "unittest": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000"]
-        },
-        "debug": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        },
-        "release": {
-          "buildOptions": ["releaseMode", "optimize", "inline"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        }
-      }
-    },
-    {
-      "name": "07_hash_table",
-      "targetType": "executable",
-      "sourcePaths": ["07_hash_table"],
-      "importPaths": ["07_hash_table"],
-      "buildTypes": {
-        "unittest": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000"]
-        },
-        "debug": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        },
-        "release": {
-          "buildOptions": ["releaseMode", "optimize", "inline"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        }
-      }
-    },
-    {
-      "name": "08_primitives",
-      "targetType": "executable",
-      "sourcePaths": ["08_primitives"],
-      "importPaths": ["08_primitives"],
-      "buildTypes": {
-        "unittest": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000"]
-        },
-        "debug": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        },
-        "release": {
-          "buildOptions": ["releaseMode", "optimize", "inline"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        }
-      }
-    },
-    {
-      "name": "09_exec_array",
-      "targetType": "executable",
-      "sourcePaths": ["09_exec_array"],
-      "importPaths": ["09_exec_array"],
-      "buildTypes": {
-        "unittest": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000"]
-        },
-        "debug": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        },
-        "release": {
-          "buildOptions": ["releaseMode", "optimize", "inline"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        }
-      }
-    },
-    {
-      "name": "10_control_stack",
-      "targetType": "executable",
-      "sourcePaths": ["10_control_stack"],
-      "importPaths": ["10_control_stack"],
-      "buildTypes": {
-        "unittest": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000"]
-        },
-        "debug": {
-          "buildOptions": ["unittests", "debugMode", "debugInfo"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        },
-        "release": {
-          "buildOptions": ["releaseMode", "optimize", "inline"],
-          "dflags": ["-dip25", "-dip1000", "-betterC"]
-        }
-      }
     }
-  ]
 }

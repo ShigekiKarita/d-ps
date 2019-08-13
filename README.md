@@ -5,7 +5,7 @@ ref: https://karino2.github.io/c-lesson/forth_modoki.html
 ## rules
 
 - no runtime `-betterC`
-- no free
+- no library (except for C standard library in `core.stdc`)
 - tiny and simple
 
 ## usage

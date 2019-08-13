@@ -17,8 +17,7 @@ void main()
         eval();
         if (globalStack.length > 0)
         {
-            auto top = globalStack.pop();
-            top.print();
+            globalStack.top().print();
             printf("\n");
         }
         printf(">>> ");

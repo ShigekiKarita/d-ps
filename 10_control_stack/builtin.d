@@ -26,6 +26,9 @@ void registerBuiltinOps()
     o.value.func = &whileOp;
     globalNames.put("while", o);
 
+    o.value.func = &pstackOp;
+    globalNames.put("pstack", o);
+
     // stack ops
     o.value.func = &popOp;
     globalNames.put("pop", o);
@@ -78,6 +81,13 @@ void registerBuiltinOps()
 /*****************
  special operators
  *****************/
+
+/// builtin print stack function
+void pstackOp()
+{
+    import eval : printGlobalStack;
+    printGlobalStack();
+}
 
 /// builtin def function
 void defOp()
