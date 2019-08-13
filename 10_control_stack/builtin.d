@@ -20,6 +20,22 @@ void registerBuiltinOps()
     o.value.func = &whileOp;
     globalNames.put("while", o);
 
+    // stack ops
+    o.value.func = &popOp;
+    globalNames.put("pop", o);
+
+    o.value.func = &exchOp;
+    globalNames.put("exch", o);
+
+    o.value.func = &dupOp;
+    globalNames.put("dup", o);
+
+    o.value.func = &indexOp;
+    globalNames.put("index", o);
+
+    o.value.func = &rollOp;
+    globalNames.put("roll", o);
+
     // numerical ops
     o.value.func = &binaryOp!"+";
     globalNames.put("add", o);
@@ -188,10 +204,189 @@ unittest
     }
 }
 
+/***************
+ stack operators
+ ***************/
+
+/// builtin stack pop: any1 ->
+void popOp()
+{
+    // get args
+    executeStack();
+    auto a = globalStack.pop(); // discard
+}
+
+///
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+    {
+        cl_getc_set_src("1 2 pop");
+        eval();
+        auto top = globalStack.top();
+        assert(top.type == PSType.number);
+        assert(top.value.number == 1);
+
+        cl_getc_set_src("pop");
+        eval();
+        assert(globalStack.empty);
+    }
+}
+
+/// builtin stack exchange: any1 any2 -> any2 any1
+void exchOp()
+{
+    // get args
+    executeStack();
+    auto a = globalStack.pop();
+    executeStack();
+    auto b = globalStack.pop();
+
+    globalStack.push(a);
+    globalStack.push(b);
+}
+
+///
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+    {
+        cl_getc_set_src("1 2 exch");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 1);
+
+        auto b = globalStack.pop();
+        assert(b.type == PSType.number);
+        assert(b.value.number == 2);
+
+        assert(globalStack.empty);
+    }
+}
+
+/// builtin stack duplicate: any1 -> any1 any1
+void dupOp()
+{
+    // get args
+    executeStack();
+    auto a = globalStack.top();
+    globalStack.push(*a);
+}
+
+///
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+    {
+        cl_getc_set_src("1 dup");
+        eval();
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 1);
+
+        auto b = globalStack.pop();
+        assert(b.type == PSType.number);
+        assert(b.value.number == 1);
+
+        assert(globalStack.empty);
+    }
+}
+
+/// builtin stack index: ... any_n ... any_0 n -> ... any_n ... any_0 any_n
+void indexOp()
+{
+    // get args
+    executeStack();
+    auto a = globalStack.pop();
+    assert(a.type == PSType.number, "arg of `index` should be number");
+    auto i = globalStack.top(a.value.number);
+    globalStack.push(*i);
+}
+
+///
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+    {
+        cl_getc_set_src("1 2 3 1 index");
+        eval();
+        assert(globalStack.length == 4);
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 2);
+    }
+}
+
+/// builtin stack roll: any_n ... any_0 n j -> any_{k-1} ... any_0 any_n ... any_k (where k = j % n)
+void rollOp()
+{
+    // get args
+    executeStack();
+    auto jo = globalStack.pop();
+    assert(jo.type == PSType.number, "1st arg of `roll` should be number");
+    auto no = globalStack.pop();
+    assert(no.type == PSType.number, "2nd arg of `roll` should be number");
+    auto n = no.value.number;
+    auto j = jo.value.number % n;
+
+    auto topn = globalStack.topk(n);
+    foreach (i; 0 .. j)
+    {
+        auto tmp = topn[i];
+        auto k = (i + j) % n;
+        topn[i] = topn[k];
+        topn[k] = tmp;
+    }
+}
+
+///
+unittest
+{
+    import cl_getc : cl_getc_set_src;
+
+    scope (exit) clearTopLevel();
+    {
+        cl_getc_set_src("1 2 3 4 5 6 7 4 3 roll");
+        eval(); // 1 2 3 5 6 7 4
+        assert(globalStack.length == 7);
+        auto a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 4);
+        a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 7);
+        a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 6);
+        a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 5);
+        a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 3);
+        a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 2);
+        a = globalStack.pop();
+        assert(a.type == PSType.number);
+        assert(a.value.number == 1);
+    }
+}
+
 /*****************
  numeric operators
  *****************/
 
+/// binary operator template
 void binaryOp(string op)()
 {
     // get args

@@ -24,10 +24,21 @@ struct Stack(T, size_t N = 1024)
         return payload[length];
     }
 
-    T* top() pure
+    T* top(size_t i = 0) pure
     {
-        if (length == 0) return null;
-        return this.payload.ptr + length - 1;
+        if (length <= i) return null;
+        return this.payload.ptr + length - i - 1;
+    }
+
+    T[] topk(size_t k)
+    {
+        debug if (length <= k)
+        {
+            import core.stdc.stdio : fprintf, stderr;
+            fprintf(stderr, "ERROR: length (%d) <= k (%d)", length, k);
+            assert(false, "ERROR: too many request");
+        }
+        return this.payload.ptr[length - k .. length];
     }
 }
 
