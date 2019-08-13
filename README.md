@@ -1,5 +1,8 @@
 # Toy implementation of Post Script in D
 
+[![CircleCI](https://circleci.com/gh/ShigekiKarita/d-ps.svg?style=svg)](https://circleci.com/gh/ShigekiKarita/d-ps)
+[![codecov](https://codecov.io/gh/ShigekiKarita/d-ps/branch/master/graph/badge.svg)](https://codecov.io/gh/ShigekiKarita/d-ps)
+
 ref: https://karino2.github.io/c-lesson/forth_modoki.html
 
 ## rules

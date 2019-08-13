@@ -168,6 +168,10 @@
             "buildOptions": ["unittests", "debugMode", "debugInfo"],
             "dflags": ["-dip25", "-dip1000"]
         },
+        "unittest-cov": {
+            "buildOptions": ["unittests", "coverage", "debugMode", "debugInfo"],
+            "dflags": ["-dip25", "-dip1000"]
+        },
         "debug": {
             "buildOptions": ["unittests", "debugMode", "debugInfo"],
             "dflags": ["-dip25", "-dip1000", "-betterC"]

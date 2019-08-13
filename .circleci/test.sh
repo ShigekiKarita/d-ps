@@ -8,6 +8,6 @@ dub test --build=unittest-cov
 # cat dub.selections.json
 
 if [ "$DC" = dmd ]; then
-    bash <(curl -s https://codecov.io/bash) -s "*-grain-*.lst"
+    bash <(curl -s https://codecov.io/bash)
 fi
 
